@@ -1,0 +1,1 @@
+loadstring(game:HttpGet('https://raw.githubusercontent.com/r3al1tygethuzz/Good-Grades/refs/heads/main/raw.lua'))()
