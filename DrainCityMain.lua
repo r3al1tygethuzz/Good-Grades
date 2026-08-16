@@ -1,8 +1,8 @@
 --[[
     Advanced Aimbot + ESP GUI Script for Roblox
     Features:
-    - Modern UI with curved edges
-    - Instant loading
+    - Modern UI with curved edges, gradients, and neon effects
+    - Instant loading with smooth animations
     - Tab system (Main, Visuals, Character, Settings)
     - Customizable UI Toggle Keybind
     - Smooth Noclip with anti-spam
@@ -10,14 +10,14 @@
     - Fly speed slider (WORKING)
     - Fly controls: W=Forward, S=Backward, A=Left, D=Right, R=Up, LeftControl=Down
     - Keybinds for Noclip (N) and Fly (F toggle)
-    - Modern ESP with full boxes
-    - ESP auto-deletes when off-screen
+    - Modern ESP with accurate full boxes, tracers, and distance
+    - ESP auto-deletes when off-screen or invalid
     - STICKY AIMBOT (locks on and follows target)
     - Mouse Lock OR Camera Lock mode
     - FOV Circle PERFECTLY FOLLOWS CURSOR
     - Smooth aiming with adjustable smoothness
     - Adjustable aim radius
-    - Resizable and draggable GUI
+    - Resizable and draggable GUI with enhanced drag
     - Press customizable key to toggle GUI visibility
 ]]
 
@@ -36,50 +36,90 @@ ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Main container frame with rounded edges (EXPANDED FOR MORE TABS)
+-- Main container frame with modern rounded edges and gradient
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 380, 0, 520)
 MainFrame.Position = UDim2.new(0.5, -190, 0.5, -260)
-MainFrame.BackgroundColor3 = Color3.fromRGB(37, 37, 53) -- Darker, more modern
-MainFrame.BackgroundTransparency = 0.15
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 35) -- Deeper dark
+MainFrame.BackgroundTransparency = 0.1
 MainFrame.BorderSizePixel = 0
 MainFrame.Parent = ScreenGui
 MainFrame.Visible = true
 MainFrame.ClipsDescendants = true
 
+-- Modern gradient background
+local MainGradient = Instance.new("UIGradient")
+MainGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 35)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(30, 30, 50)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 30))
+}
+MainGradient.Rotation = 45
+MainGradient.Parent = MainFrame
+
 -- Rounded corners for main frame
 local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 16)
+MainCorner.CornerRadius = UDim.new(0, 20)
 MainCorner.Parent = MainFrame
 
--- Blue glow border
+-- Neon glow border with gradient
 local BorderFrame = Instance.new("Frame")
-BorderFrame.Size = UDim2.new(1, -2, 1, -2)
-BorderFrame.Position = UDim2.new(0, 1, 0, 1)
-BorderFrame.BackgroundColor3 = Color3.fromRGB(48, 48, 69) -- More vibrant
-BorderFrame.BackgroundTransparency = 0.7
-BorderFrame.BorderSizePixel = 2
-BorderFrame.BorderColor3 = Color3.fromRGB(65, 150, 255)
+BorderFrame.Size = UDim2.new(1, -4, 1, -4)
+BorderFrame.Position = UDim2.new(0, 2, 0, 2)
+BorderFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+BorderFrame.BackgroundTransparency = 0.8
+BorderFrame.BorderSizePixel = 0
 BorderFrame.Parent = MainFrame
+
 local BorderCorner = Instance.new("UICorner")
-BorderCorner.CornerRadius = UDim.new(0, 14)
+BorderCorner.CornerRadius = UDim.new(0, 18)
 BorderCorner.Parent = BorderFrame
+
+local BorderGradient = Instance.new("UIGradient")
+BorderGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 150, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(150, 100, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 150, 255))
+}
+BorderGradient.Rotation = 90
+BorderGradient.Parent = BorderFrame
+
+-- Inner glow effect
+local InnerGlow = Instance.new("Frame")
+InnerGlow.Size = UDim2.new(1, -8, 1, -8)
+InnerGlow.Position = UDim2.new(0, 4, 0, 4)
+InnerGlow.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+InnerGlow.BackgroundTransparency = 0.98
+InnerGlow.BorderSizePixel = 0
+InnerGlow.Parent = BorderFrame
+
+local InnerCorner = Instance.new("UICorner")
+InnerCorner.CornerRadius = UDim.new(0, 16)
+InnerCorner.Parent = InnerGlow
 
 -- ===== DRAG GRABBER BUTTON =====
 local GrabberButton = Instance.new("TextButton")
-GrabberButton.Size = UDim2.new(0, 30, 0, 30)
-GrabberButton.Position = UDim2.new(0, 8, 0, 8)
-GrabberButton.BackgroundColor3 = Color3.fromRGB(55, 55, 85) -- Brighter
-GrabberButton.BackgroundTransparency = 0.2
+GrabberButton.Size = UDim2.new(0, 35, 0, 35)
+GrabberButton.Position = UDim2.new(0, 10, 0, 10)
+GrabberButton.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
+GrabberButton.BackgroundTransparency = 0.3
 GrabberButton.BorderSizePixel = 0
-GrabberButton.Text = "≡"
-GrabberButton.TextColor3 = Color3.fromRGB(100, 180, 255)
+GrabberButton.Text = "⋮⋮"
+GrabberButton.TextColor3 = Color3.fromRGB(150, 200, 255)
 GrabberButton.TextScaled = true
 GrabberButton.Font = Enum.Font.GothamBold
 GrabberButton.Parent = MainFrame
+
 local GrabberCorner = Instance.new("UICorner")
-GrabberCorner.CornerRadius = UDim.new(0, 8)
+GrabberCorner.CornerRadius = UDim.new(0, 10)
 GrabberCorner.Parent = GrabberButton
+
+local GrabberGradient = Instance.new("UIGradient")
+GrabberGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 100)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 70))
+}
+GrabberGradient.Parent = GrabberButton
 
 local function makeGrabberDraggable(grabber, frame)
     local dragging = false
@@ -117,90 +157,111 @@ end
 
 makeGrabberDraggable(GrabberButton, MainFrame)
 
--- Title
+-- Title with neon effect
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -50, 0, 30)
-Title.Position = UDim2.new(0, 45, 0, 8)
+Title.Size = UDim2.new(1, -60, 0, 35)
+Title.Position = UDim2.new(0, 50, 0, 10)
 Title.BackgroundTransparency = 1
-Title.Text = "DrainWare - DrainCity"
-Title.TextColor3 = Color3.fromRGB(100, 180, 255)
+Title.Text = "NEON CHEATS"
+Title.TextColor3 = Color3.fromRGB(200, 250, 255)
 Title.TextScaled = true
-Title.Font = Enum.Font.GothamBold
+Title.Font = Enum.Font.GothamBlack
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = MainFrame
 
--- Tab Buttons (EXPANDED FOR 4 TABS)
+local TitleStroke = Instance.new("UIStroke")
+TitleStroke.Color = Color3.fromRGB(100, 150, 255)
+TitleStroke.Thickness = 1
+TitleStroke.Transparency = 0.7
+TitleStroke.Parent = Title
+
+-- Tab Buttons (EXPANDED FOR 4 TABS) with modern styling
 local TabContainer = Instance.new("Frame")
-TabContainer.Size = UDim2.new(1, -20, 0, 35)
-TabContainer.Position = UDim2.new(0, 10, 0, 45)
+TabContainer.Size = UDim2.new(1, -20, 0, 40)
+TabContainer.Position = UDim2.new(0, 10, 0, 50)
 TabContainer.BackgroundTransparency = 1
 TabContainer.BorderSizePixel = 0
 TabContainer.Parent = MainFrame
 
 local MainTabButton = Instance.new("TextButton")
-MainTabButton.Size = UDim2.new(0, 80, 1, -4)
-MainTabButton.Position = UDim2.new(0, 0, 0, 2)
-MainTabButton.BackgroundColor3 = Color3.fromRGB(65, 65, 95) -- More vibrant
+MainTabButton.Size = UDim2.new(0, 85, 1, -6)
+MainTabButton.Position = UDim2.new(0, 0, 0, 3)
+MainTabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 100)
+MainTabButton.BackgroundTransparency = 0.4
 MainTabButton.BorderSizePixel = 0
 MainTabButton.Text = "Main"
-MainTabButton.TextColor3 = Color3.fromRGB(100, 180, 255)
+MainTabButton.TextColor3 = Color3.fromRGB(150, 200, 255)
 MainTabButton.TextScaled = true
 MainTabButton.Font = Enum.Font.GothamBold
 MainTabButton.Parent = TabContainer
+
 local MainTabCorner = Instance.new("UICorner")
-MainTabCorner.CornerRadius = UDim.new(0, 8)
+MainTabCorner.CornerRadius = UDim.new(0, 12)
 MainTabCorner.Parent = MainTabButton
 
+local MainTabGradient = Instance.new("UIGradient")
+MainTabGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(70, 70, 120)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 50, 80))
+}
+MainTabGradient.Parent = MainTabButton
+
 local VisualsTabButton = Instance.new("TextButton")
-VisualsTabButton.Size = UDim2.new(0, 80, 1, -4)
-VisualsTabButton.Position = UDim2.new(0, 85, 0, 2)
-VisualsTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+VisualsTabButton.Size = UDim2.new(0, 85, 1, -6)
+VisualsTabButton.Position = UDim2.new(0, 90, 0, 3)
+VisualsTabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 65)
+VisualsTabButton.BackgroundTransparency = 0.6
 VisualsTabButton.BorderSizePixel = 0
 VisualsTabButton.Text = "Visuals"
-VisualsTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+VisualsTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
 VisualsTabButton.TextScaled = true
 VisualsTabButton.Font = Enum.Font.GothamBold
 VisualsTabButton.Parent = TabContainer
+
 local VisualsTabCorner = Instance.new("UICorner")
-VisualsTabCorner.CornerRadius = UDim.new(0, 8)
+VisualsTabCorner.CornerRadius = UDim.new(0, 12)
 VisualsTabCorner.Parent = VisualsTabButton
 
 local CharTabButton = Instance.new("TextButton")
-CharTabButton.Size = UDim2.new(0, 80, 1, -4)
-CharTabButton.Position = UDim2.new(0, 170, 0, 2)
-CharTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+CharTabButton.Size = UDim2.new(0, 85, 1, -6)
+CharTabButton.Position = UDim2.new(0, 180, 0, 3)
+CharTabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 65)
+CharTabButton.BackgroundTransparency = 0.6
 CharTabButton.BorderSizePixel = 0
 CharTabButton.Text = "Character"
-CharTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+CharTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
 CharTabButton.TextScaled = true
 CharTabButton.Font = Enum.Font.GothamBold
 CharTabButton.Parent = TabContainer
+
 local CharTabCorner = Instance.new("UICorner")
-CharTabCorner.CornerRadius = UDim.new(0, 8)
+CharTabCorner.CornerRadius = UDim.new(0, 12)
 CharTabCorner.Parent = CharTabButton
 
 local SettingsTabButton = Instance.new("TextButton")
-SettingsTabButton.Size = UDim2.new(0, 80, 1, -4)
-SettingsTabButton.Position = UDim2.new(0, 255, 0, 2)
-SettingsTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+SettingsTabButton.Size = UDim2.new(0, 85, 1, -6)
+SettingsTabButton.Position = UDim2.new(0, 270, 0, 3)
+SettingsTabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 65)
+SettingsTabButton.BackgroundTransparency = 0.6
 SettingsTabButton.BorderSizePixel = 0
 SettingsTabButton.Text = "Settings"
-SettingsTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+SettingsTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
 SettingsTabButton.TextScaled = true
 SettingsTabButton.Font = Enum.Font.GothamBold
 SettingsTabButton.Parent = TabContainer
+
 local SettingsTabCorner = Instance.new("UICorner")
-SettingsTabCorner.CornerRadius = UDim.new(0, 8)
+SettingsTabCorner.CornerRadius = UDim.new(0, 12)
 SettingsTabCorner.Parent = SettingsTabButton
 
 -- ===== SCROLLING FRAME =====
 local ScrollingFrame = Instance.new("ScrollingFrame")
-ScrollingFrame.Size = UDim2.new(1, -10, 1, -100)
-ScrollingFrame.Position = UDim2.new(0, 5, 0, 85)
+ScrollingFrame.Size = UDim2.new(1, -15, 1, -105)
+ScrollingFrame.Position = UDim2.new(0, 7, 0, 95)
 ScrollingFrame.BackgroundTransparency = 1
 ScrollingFrame.BorderSizePixel = 0
-ScrollingFrame.ScrollBarThickness = 6
-ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(65, 150, 255)
+ScrollingFrame.ScrollBarThickness = 8
+ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 150, 255)
 ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 900)
 ScrollingFrame.Parent = MainFrame
 
@@ -239,56 +300,56 @@ local function switchTab(tab)
         VisualsContent.Visible = false
         CharContent.Visible = false
         SettingsContent.Visible = false
-        MainTabButton.BackgroundColor3 = Color3.fromRGB(65, 65, 95)
-        MainTabButton.TextColor3 = Color3.fromRGB(100, 180, 255)
-        VisualsTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-        VisualsTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-        CharTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-        CharTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-        SettingsTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-        SettingsTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+        MainTabButton.BackgroundTransparency = 0.2
+        MainTabButton.TextColor3 = Color3.fromRGB(200, 250, 255)
+        VisualsTabButton.BackgroundTransparency = 0.6
+        VisualsTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
+        CharTabButton.BackgroundTransparency = 0.6
+        CharTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
+        SettingsTabButton.BackgroundTransparency = 0.6
+        SettingsTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
         ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 600)
     elseif tab == "Visuals" then
         MainContent.Visible = false
         VisualsContent.Visible = true
         CharContent.Visible = false
         SettingsContent.Visible = false
-        VisualsTabButton.BackgroundColor3 = Color3.fromRGB(65, 65, 95)
-        VisualsTabButton.TextColor3 = Color3.fromRGB(100, 180, 255)
-        MainTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-        MainTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-        CharTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-        CharTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-        SettingsTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-        SettingsTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+        VisualsTabButton.BackgroundTransparency = 0.2
+        VisualsTabButton.TextColor3 = Color3.fromRGB(200, 250, 255)
+        MainTabButton.BackgroundTransparency = 0.6
+        MainTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
+        CharTabButton.BackgroundTransparency = 0.6
+        CharTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
+        SettingsTabButton.BackgroundTransparency = 0.6
+        SettingsTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
         ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 350)
     elseif tab == "Character" then
         MainContent.Visible = false
         VisualsContent.Visible = false
         CharContent.Visible = true
         SettingsContent.Visible = false
-        CharTabButton.BackgroundColor3 = Color3.fromRGB(65, 65, 95)
-        CharTabButton.TextColor3 = Color3.fromRGB(100, 180, 255)
-        MainTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-        MainTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-        VisualsTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-        VisualsTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-        SettingsTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-        SettingsTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+        CharTabButton.BackgroundTransparency = 0.2
+        CharTabButton.TextColor3 = Color3.fromRGB(200, 250, 255)
+        MainTabButton.BackgroundTransparency = 0.6
+        MainTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
+        VisualsTabButton.BackgroundTransparency = 0.6
+        VisualsTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
+        SettingsTabButton.BackgroundTransparency = 0.6
+        SettingsTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
         ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 380)
     else -- Settings
         MainContent.Visible = false
         VisualsContent.Visible = false
         CharContent.Visible = false
         SettingsContent.Visible = true
-        SettingsTabButton.BackgroundColor3 = Color3.fromRGB(65, 65, 95)
-        SettingsTabButton.TextColor3 = Color3.fromRGB(100, 180, 255)
-        MainTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-        MainTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-        VisualsTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-        VisualsTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-        CharTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-        CharTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+        SettingsTabButton.BackgroundTransparency = 0.2
+        SettingsTabButton.TextColor3 = Color3.fromRGB(200, 250, 255)
+        MainTabButton.BackgroundTransparency = 0.6
+        MainTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
+        VisualsTabButton.BackgroundTransparency = 0.6
+        VisualsTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
+        CharTabButton.BackgroundTransparency = 0.6
+        CharTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
         ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 250)
     end
 end
@@ -304,29 +365,38 @@ SettingsTabButton.MouseButton1Click:Connect(function() switchTab("Settings") end
 
 local function createStyledButton(text, position, parent, width, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, width or 140, 0, 30)
+    btn.Size = UDim2.new(0, width or 140, 0, 32)
     btn.Position = position
-    btn.BackgroundColor3 = Color3.fromRGB(55, 55, 85)
-    btn.BackgroundTransparency = 0.2
+    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
+    btn.BackgroundTransparency = 0.4
     btn.BorderSizePixel = 0
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(220, 220, 220)
     btn.TextScaled = true
-    btn.Font = Enum.Font.Gotham
+    btn.Font = Enum.Font.GothamMedium
     btn.Parent = parent
+    
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
+    corner.CornerRadius = UDim.new(0, 10)
     corner.Parent = btn
     
-    -- Hover effect
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 100)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 70))
+    }
+    gradient.Parent = btn
+    
+    -- Hover effect with animation
+    local hoverTween = TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundTransparency = 0.2, TextColor3 = Color3.fromRGB(150, 200, 255)})
+    local leaveTween = TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundTransparency = 0.4, TextColor3 = Color3.fromRGB(220, 220, 220)})
+    
     btn.MouseEnter:Connect(function()
-        btn.BackgroundTransparency = 0.1
-        btn.TextColor3 = Color3.fromRGB(100, 180, 255)
+        hoverTween:Play()
     end)
     
     btn.MouseLeave:Connect(function()
-        btn.BackgroundTransparency = 0.2
-        btn.TextColor3 = Color3.fromRGB(220, 220, 220)
+        leaveTween:Play()
     end)
     
     if callback then
@@ -343,7 +413,7 @@ local function createStyledLabel(text, position, parent, width)
     lbl.Text = text
     lbl.TextColor3 = Color3.fromRGB(200, 200, 220)
     lbl.TextScaled = true
-    lbl.Font = Enum.Font.Gotham
+    lbl.Font = Enum.Font.GothamMedium
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     lbl.Parent = parent
     return lbl
@@ -351,7 +421,7 @@ end
 
 local function createSlider(labelText, yPos, parent, minVal, maxVal, defaultVal, callback, fillColor)
     local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, 0, 0, 40)
+    container.Size = UDim2.new(1, 0, 0, 45)
     container.Position = UDim2.new(0, 0, 0, yPos)
     container.BackgroundTransparency = 1
     container.Parent = parent
@@ -363,28 +433,37 @@ local function createSlider(labelText, yPos, parent, minVal, maxVal, defaultVal,
     label.Text = labelText .. ": " .. tostring(defaultVal)
     label.TextColor3 = Color3.fromRGB(200, 200, 220)
     label.TextScaled = true
-    label.Font = Enum.Font.Gotham
+    label.Font = Enum.Font.GothamMedium
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = container
     
     local sliderBg = Instance.new("Frame")
-    sliderBg.Size = UDim2.new(0, 170, 0, 8)
-    sliderBg.Position = UDim2.new(0, 170, 0, 6)
-    sliderBg.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+    sliderBg.Size = UDim2.new(0, 180, 0, 10)
+    sliderBg.Position = UDim2.new(0, 165, 0, 8)
+    sliderBg.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
     sliderBg.BorderSizePixel = 0
     sliderBg.Parent = container
-    local sliderCorner = Instance.new("UICorner")
-    sliderCorner.CornerRadius = UDim.new(1, 0)
-    sliderCorner.Parent = sliderBg
+    
+    local bgCorner = Instance.new("UICorner")
+    bgCorner.CornerRadius = UDim.new(1, 0)
+    bgCorner.Parent = sliderBg
     
     local fill = Instance.new("Frame")
     fill.Size = UDim2.new((defaultVal - minVal) / (maxVal - minVal), 0, 1, 0)
-    fill.BackgroundColor3 = fillColor or Color3.fromRGB(65, 150, 255)
+    fill.BackgroundColor3 = fillColor or Color3.fromRGB(100, 150, 255)
     fill.BorderSizePixel = 0
     fill.Parent = sliderBg
+    
     local fillCorner = Instance.new("UICorner")
     fillCorner.CornerRadius = UDim.new(1, 0)
     fillCorner.Parent = fill
+    
+    local fillGradient = Instance.new("UIGradient")
+    fillGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, fillColor or Color3.fromRGB(100, 150, 255)),
+        ColorSequenceKeypoint.new(1, (fillColor or Color3.fromRGB(100, 150, 255)):Lerp(Color3.fromRGB(255, 255, 255), 0.3))
+    }
+    fillGradient.Parent = fill
     
     local dragging = false
     local value = defaultVal
@@ -428,9 +507,9 @@ end
 -- Row 1: UI Toggle Keybind (y=5)
 local UIToggleLabel = createStyledLabel("UI Toggle Key:", UDim2.new(0, 10, 0, 5), SettingsContent, 100)
 local UIToggleButton = createStyledButton("K", UDim2.new(0, 130, 0, 5), SettingsContent, 100)
-UIToggleButton.Size = UDim2.new(0, 100, 0, 28)
+UIToggleButton.Size = UDim2.new(0, 100, 0, 32)
 
--- Row 2: Info Label (y=40)
+-- Row 2: Info Label (y=45)
 local SettingsInfo = Instance.new("TextLabel")
 SettingsInfo.Size = UDim2.new(1, -20, 0, 60)
 SettingsInfo.Position = UDim2.new(0, 10, 0, 45)
@@ -438,7 +517,7 @@ SettingsInfo.BackgroundTransparency = 1
 SettingsInfo.Text = "Customize your keybinds and settings.\nClick the keybind button to change it."
 SettingsInfo.TextColor3 = Color3.fromRGB(160, 160, 180)
 SettingsInfo.TextScaled = true
-SettingsInfo.Font = Enum.Font.Gotham
+SettingsInfo.Font = Enum.Font.GothamMedium
 SettingsInfo.TextXAlignment = Enum.TextXAlignment.Left
 SettingsInfo.Parent = SettingsContent
 
@@ -449,38 +528,38 @@ SettingsInfo.Parent = SettingsContent
 -- Row 1: Keybind (y=5)
 local KeybindLabel = createStyledLabel("Aim Key:", UDim2.new(0, 10, 0, 5), MainContent, 100)
 local KeybindButton = createStyledButton("RMB", UDim2.new(0, 130, 0, 5), MainContent, 100)
-KeybindButton.Size = UDim2.new(0, 100, 0, 28)
+KeybindButton.Size = UDim2.new(0, 100, 0, 32)
 
--- Row 2: Aim Mode (y=40)
-local AimModeLabel = createStyledLabel("Aim Mode:", UDim2.new(0, 10, 0, 40), MainContent, 100)
-local AimModeButton = createStyledButton("Mouse Lock", UDim2.new(0, 130, 0, 40), MainContent, 130)
-AimModeButton.Size = UDim2.new(0, 130, 0, 28)
+-- Row 2: Aim Mode (y=45)
+local AimModeLabel = createStyledLabel("Aim Mode:", UDim2.new(0, 10, 0, 45), MainContent, 100)
+local AimModeButton = createStyledButton("Mouse Lock", UDim2.new(0, 130, 0, 45), MainContent, 130)
+AimModeButton.Size = UDim2.new(0, 130, 0, 32)
 
--- Row 3: Aimbot Toggle (y=75)
-local AimbotToggle = createStyledButton("Aimbot: OFF", UDim2.new(0, 10, 0, 75), MainContent, 155)
-AimbotToggle.Size = UDim2.new(0, 155, 0, 32)
+-- Row 3: Aimbot Toggle (y=80)
+local AimbotToggle = createStyledButton("Aimbot: OFF", UDim2.new(0, 10, 0, 80), MainContent, 155)
+AimbotToggle.Size = UDim2.new(0, 155, 0, 35)
 
--- Row 4: Aim Part (y=115)
-local AimPartLabel = createStyledLabel("Aim Part:", UDim2.new(0, 10, 0, 115), MainContent, 100)
-local AimPartButton = createStyledButton("Head", UDim2.new(0, 130, 0, 115), MainContent, 130)
-AimPartButton.Size = UDim2.new(0, 130, 0, 28)
+-- Row 4: Aim Part (y=125)
+local AimPartLabel = createStyledLabel("Aim Part:", UDim2.new(0, 10, 0, 125), MainContent, 100)
+local AimPartButton = createStyledButton("Head", UDim2.new(0, 130, 0, 125), MainContent, 130)
+AimPartButton.Size = UDim2.new(0, 130, 0, 32)
 
--- Row 5: FOV Toggle (y=150)
-local FOVToggle = createStyledButton("FOV: ON", UDim2.new(0, 10, 0, 150), MainContent, 155)
-FOVToggle.Size = UDim2.new(0, 155, 0, 28)
+-- Row 5: FOV Toggle (y=165)
+local FOVToggle = createStyledButton("FOV: ON", UDim2.new(0, 10, 0, 165), MainContent, 155)
+FOVToggle.Size = UDim2.new(0, 155, 0, 35)
 
--- Row 6: Aim Radius Slider (y=190)
-local aimRadiusSlider = createSlider("Aim Radius", 190, MainContent, 10, 300, 100, function(val)
+-- Row 6: Aim Radius Slider (y=210)
+local aimRadiusSlider = createSlider("Aim Radius", 210, MainContent, 10, 300, 100, function(val)
     aimRadius = val
     if fovEnabled then
         updateFOVPosition()
     end
-end, Color3.fromRGB(65, 150, 255))
+end, Color3.fromRGB(100, 150, 255))
 
--- Row 7: Smoothness Slider (y=230)
-local smoothnessSlider = createSlider("Smoothness", 230, MainContent, 1, 20, 5, function(val)
+-- Row 7: Smoothness Slider (y=260)
+local smoothnessSlider = createSlider("Smoothness", 260, MainContent, 1, 20, 5, function(val)
     smoothness = val
-end, Color3.fromRGB(255, 150, 0))
+end, Color3.fromRGB(255, 150, 100))
 
 -- ============================================
 -- ===== VISUALS TAB CONTENT =====
@@ -488,41 +567,41 @@ end, Color3.fromRGB(255, 150, 0))
 
 -- Row 1: ESP Toggle (y=5)
 local ESPToggle = createStyledButton("ESP: OFF", UDim2.new(0, 10, 0, 5), VisualsContent, 155)
-ESPToggle.Size = UDim2.new(0, 155, 0, 32)
+ESPToggle.Size = UDim2.new(0, 155, 0, 35)
 
--- Row 2: ESP Name Toggle (y=45)
-local ESPNameToggle = createStyledButton("Name Tags: ON", UDim2.new(0, 10, 0, 45), VisualsContent, 155)
-ESPNameToggle.Size = UDim2.new(0, 155, 0, 28)
+-- Row 2: ESP Name Toggle (y=50)
+local ESPNameToggle = createStyledButton("Name Tags: ON", UDim2.new(0, 10, 0, 50), VisualsContent, 155)
+ESPNameToggle.Size = UDim2.new(0, 155, 0, 32)
 
--- Row 2b: ESP Health Toggle (y=45, right side)
-local ESPHealthToggle = createStyledButton("Health Bar: ON", UDim2.new(0, 185, 0, 45), VisualsContent, 155)
-ESPHealthToggle.Size = UDim2.new(0, 155, 0, 28)
+-- Row 2b: ESP Health Toggle (y=50, right side)
+local ESPHealthToggle = createStyledButton("Health Bar: ON", UDim2.new(0, 185, 0, 50), VisualsContent, 155)
+ESPHealthToggle.Size = UDim2.new(0, 155, 0, 32)
 
--- Row 3: ESP Box Toggle (y=80)
-local ESPBoxToggle = createStyledButton("Box: ON", UDim2.new(0, 10, 0, 80), VisualsContent, 155)
-ESPBoxToggle.Size = UDim2.new(0, 155, 0, 28)
+-- Row 3: ESP Box Toggle (y=90)
+local ESPBoxToggle = createStyledButton("Box: ON", UDim2.new(0, 10, 0, 90), VisualsContent, 155)
+ESPBoxToggle.Size = UDim2.new(0, 155, 0, 32)
 
--- Row 3b: ESP Glow Toggle (y=80, right side)
-local ESPGlowToggle = createStyledButton("Glow: ON", UDim2.new(0, 185, 0, 80), VisualsContent, 155)
-ESPGlowToggle.Size = UDim2.new(0, 155, 0, 28)
+-- Row 3b: ESP Glow Toggle (y=90, right side)
+local ESPGlowToggle = createStyledButton("Glow: ON", UDim2.new(0, 185, 0, 90), VisualsContent, 155)
+ESPGlowToggle.Size = UDim2.new(0, 155, 0, 32)
 
--- Row 4: ESP Tracer Toggle (y=115)
-local ESPTracerToggle = createStyledButton("Tracers: ON", UDim2.new(0, 10, 0, 115), VisualsContent, 155)
-ESPTracerToggle.Size = UDim2.new(0, 155, 0, 28)
+-- Row 4: ESP Tracer Toggle (y=130)
+local ESPTracerToggle = createStyledButton("Tracers: ON", UDim2.new(0, 10, 0, 130), VisualsContent, 155)
+ESPTracerToggle.Size = UDim2.new(0, 155, 0, 32)
 
--- Row 4b: ESP Distance Toggle (y=115, right side)
-local ESPDistanceToggle = createStyledButton("Distance: ON", UDim2.new(0, 185, 0, 115), VisualsContent, 155)
-ESPDistanceToggle.Size = UDim2.new(0, 155, 0, 28)
+-- Row 4b: ESP Distance Toggle (y=130, right side)
+local ESPDistanceToggle = createStyledButton("Distance: ON", UDim2.new(0, 185, 0, 130), VisualsContent, 155)
+ESPDistanceToggle.Size = UDim2.new(0, 155, 0, 32)
 
--- Info Label for Visuals (y=150)
+-- Info Label for Visuals (y=170)
 local VisualsInfo = Instance.new("TextLabel")
 VisualsInfo.Size = UDim2.new(1, -20, 0, 60)
-VisualsInfo.Position = UDim2.new(0, 10, 0, 150)
+VisualsInfo.Position = UDim2.new(0, 10, 0, 170)
 VisualsInfo.BackgroundTransparency = 1
 VisualsInfo.Text = "ESP settings for player visualization.\nToggle individual elements on/off."
 VisualsInfo.TextColor3 = Color3.fromRGB(160, 160, 180)
 VisualsInfo.TextScaled = true
-VisualsInfo.Font = Enum.Font.Gotham
+VisualsInfo.Font = Enum.Font.GothamMedium
 VisualsInfo.TextXAlignment = Enum.TextXAlignment.Left
 VisualsInfo.Parent = VisualsContent
 
@@ -533,40 +612,40 @@ VisualsInfo.Parent = VisualsContent
 -- Row 1: Noclip Toggle (y=5)
 local NoclipLabel = createStyledLabel("Noclip [N]:", UDim2.new(0, 10, 0, 5), CharContent, 100)
 local NoclipToggle = createStyledButton("OFF", UDim2.new(0, 130, 0, 5), CharContent, 100)
-NoclipToggle.Size = UDim2.new(0, 100, 0, 28)
+NoclipToggle.Size = UDim2.new(0, 100, 0, 32)
 
--- Row 2: Fly Toggle (y=40)
-local FlyLabel = createStyledLabel("Fly [F]:", UDim2.new(0, 10, 0, 40), CharContent, 100)
-local FlyToggle = createStyledButton("OFF", UDim2.new(0, 130, 0, 40), CharContent, 100)
-FlyToggle.Size = UDim2.new(0, 100, 0, 28)
+-- Row 2: Fly Toggle (y=45)
+local FlyLabel = createStyledLabel("Fly [F]:", UDim2.new(0, 10, 0, 45), CharContent, 100)
+local FlyToggle = createStyledButton("OFF", UDim2.new(0, 130, 0, 45), CharContent, 100)
+FlyToggle.Size = UDim2.new(0, 100, 0, 32)
 
--- Row 3: Fly Speed Slider (y=75) - NOW WORKING
-local flySpeedSlider = createSlider("Fly Speed", 75, CharContent, 1, 20, 5, function(val)
+-- Row 3: Fly Speed Slider (y=80) - NOW WORKING
+local flySpeedSlider = createSlider("Fly Speed", 80, CharContent, 1, 20, 5, function(val)
     FLY_SPEED = val
     print("Fly speed set to: " .. val)
-end, Color3.fromRGB(255, 200, 0))
+end, Color3.fromRGB(255, 200, 100))
 
--- Row 4: Fly Controls Info (y=120)
+-- Row 4: Fly Controls Info (y=130)
 local FlyControlsInfo = Instance.new("TextLabel")
-FlyControlsInfo.Size = UDim2.new(1, -20, 0, 40)
-FlyControlsInfo.Position = UDim2.new(0, 10, 0, 120)
+FlyControlsInfo.Size = UDim2.new(1, -20, 0, 45)
+FlyControlsInfo.Position = UDim2.new(0, 10, 0, 130)
 FlyControlsInfo.BackgroundTransparency = 1
 FlyControlsInfo.Text = "W=Forward | S=Backward | A=Left | D=Right\nR=Up | LeftControl=Down"
 FlyControlsInfo.TextColor3 = Color3.fromRGB(180, 180, 200)
 FlyControlsInfo.TextScaled = true
-FlyControlsInfo.Font = Enum.Font.Gotham
+FlyControlsInfo.Font = Enum.Font.GothamMedium
 FlyControlsInfo.TextXAlignment = Enum.TextXAlignment.Left
 FlyControlsInfo.Parent = CharContent
 
--- Info Label (y=165)
+-- Info Label (y=180)
 local CharInfo = Instance.new("TextLabel")
-CharInfo.Size = UDim2.new(1, -20, 0, 100)
-CharInfo.Position = UDim2.new(0, 10, 0, 165)
+CharInfo.Size = UDim2.new(1, -20, 0, 110)
+CharInfo.Position = UDim2.new(0, 10, 0, 180)
 CharInfo.BackgroundTransparency = 1
 CharInfo.Text = "Noclip: Phase through walls (Press N)\nFly: Invisible platforms spawn under you (Press F)\nUse the above controls to move while flying\nSpeed slider adjusts movement speed"
 CharInfo.TextColor3 = Color3.fromRGB(160, 160, 180)
 CharInfo.TextScaled = true
-CharInfo.Font = Enum.Font.Gotham
+CharInfo.Font = Enum.Font.GothamMedium
 CharInfo.TextXAlignment = Enum.TextXAlignment.Left
 CharInfo.Parent = CharContent
 
@@ -694,7 +773,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
             uiToggleKeybind = keyName
             UIToggleButton.Text = keyName
             isWaitingForUIToggle = false
-            UIToggleButton.BackgroundColor3 = Color3.fromRGB(55, 55, 85)
+            UIToggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
             UIToggleButton.TextColor3 = Color3.fromRGB(220, 220, 220)
             print("UI Toggle keybind set to: " .. keyName)
             return
@@ -725,38 +804,51 @@ local function createDropdown(options, currentValue, button, parent, callback)
     end
     
     dropdownFrame = Instance.new("Frame")
-    dropdownFrame.Size = UDim2.new(0, 130, 0, #options * 28)
-    dropdownFrame.Position = button.Position + UDim2.new(0, 0, 0, 30)
-    dropdownFrame.BackgroundColor3 = Color3.fromRGB(37, 37, 53)
-    dropdownFrame.BackgroundTransparency = 0.15
-    dropdownFrame.BorderSizePixel = 1
-    dropdownFrame.BorderColor3 = Color3.fromRGB(65, 150, 255)
+    dropdownFrame.Size = UDim2.new(0, 130, 0, #options * 32)
+    dropdownFrame.Position = button.Position + UDim2.new(0, 0, 0, 35)
+    dropdownFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+    dropdownFrame.BackgroundTransparency = 0.2
+    dropdownFrame.BorderSizePixel = 2
+    dropdownFrame.BorderColor3 = Color3.fromRGB(100, 150, 255)
     dropdownFrame.Parent = parent
+    
     local dCorner = Instance.new("UICorner")
-    dCorner.CornerRadius = UDim.new(0, 8)
+    dCorner.CornerRadius = UDim.new(0, 10)
     dCorner.Parent = dropdownFrame
+    
+    local dGradient = Instance.new("UIGradient")
+    dGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 70)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 40))
+    }
+    dGradient.Parent = dropdownFrame
+    
     activeDropdown = dropdownFrame
     
     for i, option in ipairs(options) do
         local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, 0, 0, 28)
-        btn.Position = UDim2.new(0, 0, 0, (i-1) * 28)
-        btn.BackgroundColor3 = (option == currentValue) and Color3.fromRGB(65, 65, 95) or Color3.fromRGB(45, 45, 65)
-        btn.BackgroundTransparency = 0.2
+        btn.Size = UDim2.new(1, 0, 0, 32)
+        btn.Position = UDim2.new(0, 0, 0, (i-1) * 32)
+        btn.BackgroundColor3 = (option == currentValue) and Color3.fromRGB(60, 60, 100) or Color3.fromRGB(40, 40, 65)
+        btn.BackgroundTransparency = 0.3
         btn.BorderSizePixel = 0
         btn.Text = option
         btn.TextColor3 = Color3.fromRGB(220, 220, 220)
         btn.TextScaled = true
-        btn.Font = Enum.Font.Gotham
+        btn.Font = Enum.Font.GothamMedium
         btn.Parent = dropdownFrame
+        
+        local btnCorner = Instance.new("UICorner")
+        btnCorner.CornerRadius = UDim.new(0, 8)
+        btnCorner.Parent = btn
         
         btn.MouseEnter:Connect(function()
             btn.BackgroundTransparency = 0.1
-            btn.TextColor3 = Color3.fromRGB(100, 180, 255)
+            btn.TextColor3 = Color3.fromRGB(150, 200, 255)
         end)
         
         btn.MouseLeave:Connect(function()
-            btn.BackgroundTransparency = (option == currentValue) and 0.2 or 0.3
+            btn.BackgroundTransparency = (option == currentValue) and 0.3 or 0.4
             btn.TextColor3 = Color3.fromRGB(220, 220, 220)
         end)
         
@@ -844,7 +936,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
                     selectedKeybind = keyName
                     KeybindButton.Text = keyName
                     isWaitingForKeybind = false
-                    KeybindButton.BackgroundColor3 = Color3.fromRGB(55, 55, 85)
+                    KeybindButton.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
                     print("Keybind set to: " .. keyName)
                     return
                 end
@@ -853,21 +945,21 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
             selectedKeybind = "LMB"
             KeybindButton.Text = "LMB"
             isWaitingForKeybind = false
-            KeybindButton.BackgroundColor3 = Color3.fromRGB(55, 55, 85)
+            KeybindButton.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
             print("Keybind set to: LMB")
             return
         elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
             selectedKeybind = "RMB"
             KeybindButton.Text = "RMB"
             isWaitingForKeybind = false
-            KeybindButton.BackgroundColor3 = Color3.fromRGB(55, 55, 85)
+            KeybindButton.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
             print("Keybind set to: RMB")
             return
         elseif input.UserInputType == Enum.UserInputType.MouseButton3 then
             selectedKeybind = "MMB"
             KeybindButton.Text = "MMB"
             isWaitingForKeybind = false
-            KeybindButton.BackgroundColor3 = Color3.fromRGB(55, 55, 85)
+            KeybindButton.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
             print("Keybind set to: MMB")
             return
         end
@@ -1012,7 +1104,7 @@ end
 local function toggleNoclip()
     noclipEnabled = not noclipEnabled
     NoclipToggle.Text = noclipEnabled and "ON" or "OFF"
-    NoclipToggle.BackgroundColor3 = noclipEnabled and Color3.fromRGB(65, 150, 255) or Color3.fromRGB(55, 55, 85)
+    NoclipToggle.BackgroundColor3 = noclipEnabled and Color3.fromRGB(100, 150, 255) or Color3.fromRGB(50, 50, 80)
     
     if noclipEnabled and flyEnabled then
         toggleFly()
@@ -1083,7 +1175,7 @@ NoclipToggle.MouseButton1Click:Connect(toggleNoclip)
 local function toggleFly()
     flyEnabled = not flyEnabled
     FlyToggle.Text = flyEnabled and "ON" or "OFF"
-    FlyToggle.BackgroundColor3 = flyEnabled and Color3.fromRGB(65, 150, 255) or Color3.fromRGB(55, 55, 85)
+    FlyToggle.BackgroundColor3 = flyEnabled and Color3.fromRGB(100, 150, 255) or Color3.fromRGB(50, 50, 80)
     
     if flyEnabled and noclipEnabled then
         toggleNoclip()
@@ -1245,10 +1337,10 @@ local function createFOVCircle()
     fovCircle = Instance.new("Frame")
     fovCircle.Size = UDim2.new(0, aimRadius * 2, 0, aimRadius * 2)
     fovCircle.Position = UDim2.new(0, 0, 0, 0)
-    fovCircle.BackgroundTransparency = 0.85
-    fovCircle.BackgroundColor3 = Color3.fromRGB(65, 150, 255)
+    fovCircle.BackgroundTransparency = 0.9
+    fovCircle.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
     fovCircle.BorderSizePixel = 2
-    fovCircle.BorderColor3 = Color3.fromRGB(65, 150, 255)
+    fovCircle.BorderColor3 = Color3.fromRGB(100, 150, 255)
     fovCircle.ZIndex = 999
     fovCircle.Parent = ScreenGui
     fovCircle.Visible = fovEnabled
@@ -1257,11 +1349,18 @@ local function createFOVCircle()
     corner.CornerRadius = UDim.new(1, 0)
     corner.Parent = fovCircle
     
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 150, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 100, 255))
+    }
+    gradient.Parent = fovCircle
+    
     fovInner = Instance.new("Frame")
     fovInner.Size = UDim2.new(0.98, 0, 0.98, 0)
     fovInner.Position = UDim2.new(0.01, 0, 0.01, 0)
-    fovInner.BackgroundTransparency = 0.9
-    fovInner.BackgroundColor3 = Color3.fromRGB(65, 150, 255)
+    fovInner.BackgroundTransparency = 0.95
+    fovInner.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
     fovInner.BorderSizePixel = 0
     fovInner.Parent = fovCircle
     local innerCorner = Instance.new("UICorner")
@@ -1318,7 +1417,7 @@ end)
 local function toggleFOV()
     fovEnabled = not fovEnabled
     FOVToggle.Text = fovEnabled and "FOV: ON" or "FOV: OFF"
-    FOVToggle.BackgroundColor3 = fovEnabled and Color3.fromRGB(65, 150, 255) or Color3.fromRGB(55, 55, 85)
+    FOVToggle.BackgroundColor3 = fovEnabled and Color3.fromRGB(100, 150, 255) or Color3.fromRGB(50, 50, 80)
     if fovEnabled then
         updateFOVPosition()
     else
@@ -1432,6 +1531,7 @@ local function createESP(player)
     healthBg.Parent = ScreenGui
     healthBg.Visible = espEnabled and espHealthEnabled
     healthBg.ZIndex = 100
+    
     local hCorner = Instance.new("UICorner")
     hCorner.CornerRadius = UDim.new(0, 3)
     hCorner.Parent = healthBg
@@ -1442,6 +1542,7 @@ local function createESP(player)
     healthFill.BorderSizePixel = 0
     healthFill.Parent = healthBg
     healthFill.ZIndex = 101
+    
     local hfCorner = Instance.new("UICorner")
     hfCorner.CornerRadius = UDim.new(0, 3)
     hfCorner.Parent = healthFill
@@ -1449,11 +1550,12 @@ local function createESP(player)
     local box = Instance.new("Frame")
     box.Size = UDim2.new(0, 50, 0, 100)
     box.BackgroundTransparency = 0.9
-    box.BackgroundColor3 = Color3.fromRGB(65, 150, 255)
+    box.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
     box.BorderSizePixel = 0
     box.Parent = ScreenGui
     box.Visible = espEnabled and espBoxEnabled
     box.ZIndex = 98
+    
     local boxCorner = Instance.new("UICorner")
     boxCorner.CornerRadius = UDim.new(0, 4)
     boxCorner.Parent = box
@@ -1461,7 +1563,7 @@ local function createESP(player)
     local boxLines = {}
     for i = 1, 4 do
         local line = Instance.new("Frame")
-        line.BackgroundColor3 = Color3.fromRGB(65, 150, 255)
+        line.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
         line.BackgroundTransparency = 0.2
         line.BorderSizePixel = 0
         line.Parent = ScreenGui
@@ -1473,12 +1575,13 @@ local function createESP(player)
     local glowBox = Instance.new("Frame")
     glowBox.Size = UDim2.new(0, 50, 0, 100)
     glowBox.BackgroundTransparency = 0.95
-    glowBox.BackgroundColor3 = Color3.fromRGB(65, 150, 255)
+    glowBox.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
     glowBox.BorderSizePixel = 3
-    glowBox.BorderColor3 = Color3.fromRGB(65, 150, 255)
+    glowBox.BorderColor3 = Color3.fromRGB(100, 150, 255)
     glowBox.Parent = ScreenGui
     glowBox.Visible = espEnabled and espGlowEnabled
     glowBox.ZIndex = 97
+    
     local glowCorner = Instance.new("UICorner")
     glowCorner.CornerRadius = UDim.new(0, 6)
     glowCorner.Parent = glowBox
@@ -1486,7 +1589,7 @@ local function createESP(player)
     -- Tracer line from top of screen to player head
     local tracerLine = Drawing.new("Line")
     tracerLine.Visible = espEnabled and espTracerEnabled
-    tracerLine.Color = Color3.fromRGB(65, 150, 255)
+    tracerLine.Color = Color3.fromRGB(100, 150, 255)
     tracerLine.Thickness = 1
     tracerLine.Transparency = 0.8
     
@@ -1553,15 +1656,15 @@ local function updateESP()
             continue
         end
         
-        -- Get bounding box for full character
-        local extents = character:GetExtents(true)
-        local size = extents.Size
-        local center = extents.CFrame.Position
+        -- Improved bounding box calculation using GetBoundingBox
+        local _, boundingBoxSize = character:GetBoundingBox()
+        local center = character:GetPivot().Position
+        local size = boundingBoxSize
+        
+        -- Ensure minimum size
+        size = Vector3.new(math.max(size.X, 2), math.max(size.Y, 4), math.max(size.Z, 2))
         
         local screenCenter, onScreen = Camera:WorldToViewportPoint(center)
-        local screenTop, _ = Camera:WorldToViewportPoint(center + Vector3.new(0, size.Y/2, 0))
-        local screenBottom, _ = Camera:WorldToViewportPoint(center - Vector3.new(0, size.Y/2, 0))
-        
         if not onScreen then
             data.nameLabel.Visible = false
             data.distLabel.Visible = false
@@ -1577,6 +1680,22 @@ local function updateESP()
             continue
         end
         
+        -- Get screen corners of the bounding box
+        local topLeft = Camera:WorldToViewportPoint(center + Vector3.new(-size.X/2, size.Y/2, 0))
+        local topRight = Camera:WorldToViewportPoint(center + Vector3.new(size.X/2, size.Y/2, 0))
+        local bottomLeft = Camera:WorldToViewportPoint(center + Vector3.new(-size.X/2, -size.Y/2, 0))
+        local bottomRight = Camera:WorldToViewportPoint(center + Vector3.new(size.X/2, -size.Y/2, 0))
+        
+        -- Calculate width and height from screen points
+        local width = math.abs(topRight.X - topLeft.X)
+        local height = math.abs(topLeft.Y - bottomLeft.Y)
+        local x = math.min(topLeft.X, topRight.X, bottomLeft.X, bottomRight.X)
+        local y = math.min(topLeft.Y, topRight.Y, bottomLeft.Y, bottomRight.Y)
+        
+        -- Ensure minimum dimensions
+        width = math.max(width, 20)
+        height = math.max(height, 40)
+        
         data.nameLabel.Visible = espEnabled and espNameEnabled
         data.distLabel.Visible = espEnabled and espDistanceEnabled
         data.healthBg.Visible = espEnabled and espHealthEnabled
@@ -1590,12 +1709,6 @@ local function updateESP()
         if data.tracerLine then
             data.tracerLine.Visible = espEnabled and espTracerEnabled
         end
-        
-        -- Calculate dimensions based on full character bounds
-        local height = math.abs(screenBottom.Y - screenTop.Y) * 1.1
-        local width = height * 0.4
-        local x = screenCenter.X - width / 2
-        local y = screenTop.Y
         
         local health = character.Humanoid.Health / character.Humanoid.MaxHealth
         local healthColor = Color3.fromRGB(255 * (1 - health), 255 * health, 0)
@@ -1685,7 +1798,7 @@ end)
 local function toggleAimbot()
     aimbotEnabled = not aimbotEnabled
     AimbotToggle.Text = aimbotEnabled and "Aimbot: ON" or "Aimbot: OFF"
-    AimbotToggle.BackgroundColor3 = aimbotEnabled and Color3.fromRGB(65, 150, 255) or Color3.fromRGB(55, 55, 85)
+    AimbotToggle.BackgroundColor3 = aimbotEnabled and Color3.fromRGB(100, 150, 255) or Color3.fromRGB(50, 50, 80)
     if aimbotEnabled then 
         if fovEnabled then updateFOVPosition() end
         print("Aimbot enabled! Hold " .. selectedKeybind .. " to aim (STICKY)")
@@ -1702,7 +1815,7 @@ end
 local function toggleESP()
     espEnabled = not espEnabled
     ESPToggle.Text = espEnabled and "ESP: ON" or "ESP: OFF"
-    ESPToggle.BackgroundColor3 = espEnabled and Color3.fromRGB(65, 150, 255) or Color3.fromRGB(55, 55, 85)
+    ESPToggle.BackgroundColor3 = espEnabled and Color3.fromRGB(100, 150, 255) or Color3.fromRGB(50, 50, 80)
     
     if espEnabled then
         for _, player in pairs(Players:GetPlayers()) do
@@ -1718,7 +1831,7 @@ end
 local function toggleESPName()
     espNameEnabled = not espNameEnabled
     ESPNameToggle.Text = espNameEnabled and "Name Tags: ON" or "Name Tags: OFF"
-    ESPNameToggle.BackgroundColor3 = espNameEnabled and Color3.fromRGB(65, 150, 255) or Color3.fromRGB(55, 55, 85)
+    ESPNameToggle.BackgroundColor3 = espNameEnabled and Color3.fromRGB(100, 150, 255) or Color3.fromRGB(50, 50, 80)
     
     for player, data in pairs(espObjects) do
         data.nameLabel.Visible = espEnabled and espNameEnabled
@@ -1728,7 +1841,7 @@ end
 local function toggleESPHealth()
     espHealthEnabled = not espHealthEnabled
     ESPHealthToggle.Text = espHealthEnabled and "Health Bar: ON" or "Health Bar: OFF"
-    ESPHealthToggle.BackgroundColor3 = espHealthEnabled and Color3.fromRGB(65, 150, 255) or Color3.fromRGB(55, 55, 85)
+    ESPHealthToggle.BackgroundColor3 = espHealthEnabled and Color3.fromRGB(100, 150, 255) or Color3.fromRGB(50, 50, 80)
     
     for player, data in pairs(espObjects) do
         data.healthBg.Visible = espEnabled and espHealthEnabled
@@ -1738,7 +1851,7 @@ end
 local function toggleESPBox()
     espBoxEnabled = not espBoxEnabled
     ESPBoxToggle.Text = espBoxEnabled and "Box: ON" or "Box: OFF"
-    ESPBoxToggle.BackgroundColor3 = espBoxEnabled and Color3.fromRGB(65, 150, 255) or Color3.fromRGB(55, 55, 85)
+    ESPBoxToggle.BackgroundColor3 = espBoxEnabled and Color3.fromRGB(100, 150, 255) or Color3.fromRGB(50, 50, 80)
     
     for player, data in pairs(espObjects) do
         data.box.Visible = espEnabled and espBoxEnabled
@@ -1751,7 +1864,7 @@ end
 local function toggleESPGlow()
     espGlowEnabled = not espGlowEnabled
     ESPGlowToggle.Text = espGlowEnabled and "Glow: ON" or "Glow: OFF"
-    ESPGlowToggle.BackgroundColor3 = espGlowEnabled and Color3.fromRGB(65, 150, 255) or Color3.fromRGB(55, 55, 85)
+    ESPGlowToggle.BackgroundColor3 = espGlowEnabled and Color3.fromRGB(100, 150, 255) or Color3.fromRGB(50, 50, 80)
     
     for player, data in pairs(espObjects) do
         data.glowBox.Visible = espEnabled and espGlowEnabled
@@ -1761,7 +1874,7 @@ end
 local function toggleESPTracer()
     espTracerEnabled = not espTracerEnabled
     ESPTracerToggle.Text = espTracerEnabled and "Tracers: ON" or "Tracers: OFF"
-    ESPTracerToggle.BackgroundColor3 = espTracerEnabled and Color3.fromRGB(65, 150, 255) or Color3.fromRGB(55, 55, 85)
+    ESPTracerToggle.BackgroundColor3 = espTracerEnabled and Color3.fromRGB(100, 150, 255) or Color3.fromRGB(50, 50, 80)
     
     for player, data in pairs(espObjects) do
         if data.tracerLine then
@@ -1773,7 +1886,7 @@ end
 local function toggleESPDistance()
     espDistanceEnabled = not espDistanceEnabled
     ESPDistanceToggle.Text = espDistanceEnabled and "Distance: ON" or "Distance: OFF"
-    ESPDistanceToggle.BackgroundColor3 = espDistanceEnabled and Color3.fromRGB(65, 150, 255) or Color3.fromRGB(55, 55, 85)
+    ESPDistanceToggle.BackgroundColor3 = espDistanceEnabled and Color3.fromRGB(100, 150, 255) or Color3.fromRGB(50, 50, 80)
     
     for player, data in pairs(espObjects) do
         data.distLabel.Visible = espEnabled and espDistanceEnabled
