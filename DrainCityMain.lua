@@ -5,15 +5,15 @@
     - Instant loading with smooth animations
     - Tab system (Main, Visuals, Character, Settings)
     - Customizable UI Toggle Keybind
-    - Smooth Noclip with anti-spam
-    - Fly mode with INVISIBLE PLATFORMS (FIXED)
+    - Smooth Noclip with anti-spam and adjustable threshold
+    - Fly mode with INVISIBLE PLATFORMS (FIXED - no constant up)
     - Fly speed slider (WORKING)
     - Fly controls: W=Forward, S=Backward, A=Left, D=Right, R=Up, LeftControl=Down
     - Keybinds for Noclip (N) and Fly (F toggle)
-    - Modern ESP with accurate full boxes, tracers, and distance
+    - Modern ESP with accurate full boxes, tracers, and distance (FIXED layering and off-screen)
     - ESP auto-deletes when off-screen or invalid
     - STICKY AIMBOT (locks on and follows target)
-    - Mouse Lock OR Camera Lock mode
+    - Mouse Lock OR Camera Lock mode with proper smoothing
     - FOV Circle PERFECTLY FOLLOWS CURSOR
     - Smooth aiming with adjustable smoothness
     - Adjustable aim radius
@@ -162,7 +162,7 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -60, 0, 35)
 Title.Position = UDim2.new(0, 50, 0, 10)
 Title.BackgroundTransparency = 1
-Title.Text = "NEON CHEATS"
+Title.Text = "DrainWare- DrainCity"
 Title.TextColor3 = Color3.fromRGB(200, 250, 255)
 Title.TextScaled = true
 Title.Font = Enum.Font.GothamBlack
@@ -336,7 +336,7 @@ local function switchTab(tab)
         VisualsTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
         SettingsTabButton.BackgroundTransparency = 0.6
         SettingsTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
-        ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 380)
+        ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 450)  -- Increased for new slider
     else -- Settings
         MainContent.Visible = false
         VisualsContent.Visible = false
@@ -354,10 +354,10 @@ local function switchTab(tab)
     end
 end
 
-MainTabButton.MouseButton1Click:Connect(function() switchTab("Main") end)
-VisualsTabButton.MouseButton1Click:Connect(function() switchTab("Visuals") end)
-CharTabButton.MouseButton1Click:Connect(function() switchTab("Character") end)
-SettingsTabButton.MouseButton1Click:Connect(function() switchTab("Settings") end)
+MainTabButton.MouseButton1Click:Connect(switchTab, "Main")
+VisualsTabButton.MouseButton1Click:Connect(switchTab, "Visuals")
+CharTabButton.MouseButton1Click:Connect(switchTab, "Character")
+SettingsTabButton.MouseButton1Click:Connect(switchTab, "Settings")
 
 -- ============================================
 -- ===== UI HELPER FUNCTIONS =====
@@ -461,7 +461,7 @@ local function createSlider(labelText, yPos, parent, minVal, maxVal, defaultVal,
     local fillGradient = Instance.new("UIGradient")
     fillGradient.Color = ColorSequence.new{
         ColorSequenceKeypoint.new(0, fillColor or Color3.fromRGB(100, 150, 255)),
-        ColorSequenceKeypoint.new(1, (fillColor or Color3.fromRGB(100, 150, 255)):Lerp(Color3.fromRGB(255, 255, 255), 0.3))
+        ColorSequenceKeypoint.new(1, (fillColor or Color3.fromRGB(100, 150, 255)):Lerp(Color3.new(1, 1, 1), 0.3))
     }
     fillGradient.Parent = fill
     
@@ -625,10 +625,16 @@ local flySpeedSlider = createSlider("Fly Speed", 80, CharContent, 1, 20, 5, func
     print("Fly speed set to: " .. val)
 end, Color3.fromRGB(255, 200, 100))
 
--- Row 4: Fly Controls Info (y=130)
+-- Row 4: Noclip Threshold Slider (y=125) - NEW
+local noclipThresholdSlider = createSlider("Noclip Threshold", 125, CharContent, 1, 10, 3, function(val)
+    NOCLIP_THRESHOLD = val
+    print("Noclip threshold set to: " .. val .. " studs")
+end, Color3.fromRGB(100, 200, 255))
+
+-- Row 5: Fly Controls Info (y=175)
 local FlyControlsInfo = Instance.new("TextLabel")
 FlyControlsInfo.Size = UDim2.new(1, -20, 0, 45)
-FlyControlsInfo.Position = UDim2.new(0, 10, 0, 130)
+FlyControlsInfo.Position = UDim2.new(0, 10, 0, 175)
 FlyControlsInfo.BackgroundTransparency = 1
 FlyControlsInfo.Text = "W=Forward | S=Backward | A=Left | D=Right\nR=Up | LeftControl=Down"
 FlyControlsInfo.TextColor3 = Color3.fromRGB(180, 180, 200)
@@ -637,12 +643,12 @@ FlyControlsInfo.Font = Enum.Font.GothamMedium
 FlyControlsInfo.TextXAlignment = Enum.TextXAlignment.Left
 FlyControlsInfo.Parent = CharContent
 
--- Info Label (y=180)
+-- Info Label (y=225)
 local CharInfo = Instance.new("TextLabel")
 CharInfo.Size = UDim2.new(1, -20, 0, 110)
-CharInfo.Position = UDim2.new(0, 10, 0, 180)
+CharInfo.Position = UDim2.new(0, 10, 0, 225)
 CharInfo.BackgroundTransparency = 1
-CharInfo.Text = "Noclip: Phase through walls (Press N)\nFly: Invisible platforms spawn under you (Press F)\nUse the above controls to move while flying\nSpeed slider adjusts movement speed"
+CharInfo.Text = "Noclip: Phase through walls (Press N)\nFly: Invisible platforms spawn under you (Press F)\nUse the above controls to move while flying\nSpeed slider adjusts movement speed\nThreshold slider adjusts noclip teleport distance"
 CharInfo.TextColor3 = Color3.fromRGB(160, 160, 180)
 CharInfo.TextScaled = true
 CharInfo.Font = Enum.Font.GothamMedium
@@ -677,6 +683,7 @@ local currentCameraCFrame = nil
 local targetPlayer = nil
 local fovEnabled = true
 local lockedTarget = nil
+local NOCLIP_THRESHOLD = 3  -- New variable for noclip threshold
 
 local aimParts = {"Head", "HumanoidRootPart", "UpperTorso", "LowerTorso", "LeftFoot", "RightFoot", "LeftHand", "RightHand"}
 local aimModes = {"Mouse Lock", "Camera Lock"}
@@ -1046,10 +1053,10 @@ local function performTeleport()
     raycastParams.FilterDescendantsInstances = {character, LocalPlayer}
     raycastParams.IgnoreWater = true
     
-    local rayResult = workspace:Raycast(origin, direction * 3, raycastParams)
+    local rayResult = workspace:Raycast(origin, direction * NOCLIP_THRESHOLD, raycastParams)
     
     if rayResult then
-        local newPos = rootPart.Position + (rootPart.CFrame.LookVector * 4)
+        local newPos = rootPart.Position + (rootPart.CFrame.LookVector * (NOCLIP_THRESHOLD + 1))
         
         local checkRay = workspace:Raycast(newPos, Vector3.new(0, -0.5, 0), raycastParams)
         if not checkRay then
@@ -1141,7 +1148,7 @@ local function toggleNoclip()
                 raycastParams.IgnoreWater = true
                 
                 local hitWall = false
-                for i = 1, 3 do
+                for i = 1, NOCLIP_THRESHOLD do
                     local checkPos = origin + (direction * (i * 1.5))
                     local rayResult = workspace:Raycast(checkPos, direction * 1.5, raycastParams)
                     if rayResult then
@@ -1554,7 +1561,7 @@ local function createESP(player)
     box.BorderSizePixel = 0
     box.Parent = ScreenGui
     box.Visible = espEnabled and espBoxEnabled
-    box.ZIndex = 98
+    box.ZIndex = 99
     
     local boxCorner = Instance.new("UICorner")
     boxCorner.CornerRadius = UDim.new(0, 4)
@@ -1568,7 +1575,7 @@ local function createESP(player)
         line.BorderSizePixel = 0
         line.Parent = ScreenGui
         line.Visible = espEnabled and espBoxEnabled
-        line.ZIndex = 99
+        line.ZIndex = 98
         boxLines[i] = line
     end
     
@@ -1988,7 +1995,7 @@ LocalPlayer:WaitForChild("PlayerGui").ChildRemoved:Connect(function(child)
     end
 end)
 
-print("Modern Cheat loaded!")
+print("DrainWare- DrainCity loaded!")
 print("Tabs: Main | Visuals | Character | Settings")
 print("Press " .. uiToggleKeybind .. " to toggle GUI")
 print("Aimbot: Press RMB (or custom key) to aim (STICKY)")
