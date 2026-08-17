@@ -1,26 +1,3 @@
---[[
-    Advanced Aimbot + ESP GUI Script for Roblox
-    Features:
-    - Modern UI with curved edges, gradients, and neon effects
-    - Instant loading with smooth animations
-    - Tab system (Main, Visuals, Character, Settings)
-    - Customizable UI Toggle Keybind
-    - Smooth Noclip with anti-spam and adjustable threshold
-    - Fly mode with INVISIBLE PLATFORMS (FIXED - no constant up)
-    - Fly speed slider (WORKING)
-    - Fly controls: W=Forward, S=Backward, A=Left, D=Right, R=Up, LeftControl=Down
-    - Keybinds for Noclip (N) and Fly (F toggle)
-    - Modern ESP with accurate full boxes, tracers, and distance (FIXED layering and off-screen)
-    - ESP auto-deletes when off-screen or invalid
-    - STICKY AIMBOT (locks on and follows target)
-    - Mouse Lock OR Camera Lock mode with proper smoothing
-    - FOV Circle PERFECTLY FOLLOWS CURSOR
-    - Smooth aiming with adjustable smoothness
-    - Adjustable aim radius
-    - Resizable and draggable GUI with enhanced drag
-    - Press customizable key to toggle GUI visibility
-]]
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -336,7 +313,7 @@ local function switchTab(tab)
         VisualsTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
         SettingsTabButton.BackgroundTransparency = 0.6
         SettingsTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
-        ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 450)  -- Increased for new slider
+        ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 500)  -- Increased for new elements
     else -- Settings
         MainContent.Visible = false
         VisualsContent.Visible = false
@@ -631,10 +608,15 @@ local noclipThresholdSlider = createSlider("Noclip Threshold", 125, CharContent,
     print("Noclip threshold set to: " .. val .. " studs")
 end, Color3.fromRGB(100, 200, 255))
 
--- Row 5: Fly Controls Info (y=175)
+-- Row 5: DeSync Toggle (y=170) - NEW
+local DeSyncLabel = createStyledLabel("DeSync:", UDim2.new(0, 10, 0, 170), CharContent, 100)
+local DeSyncToggle = createStyledButton("OFF", UDim2.new(0, 130, 0, 170), CharContent, 100)
+DeSyncToggle.Size = UDim2.new(0, 100, 0, 32)
+
+-- Row 6: Fly Controls Info (y=210)
 local FlyControlsInfo = Instance.new("TextLabel")
 FlyControlsInfo.Size = UDim2.new(1, -20, 0, 45)
-FlyControlsInfo.Position = UDim2.new(0, 10, 0, 175)
+FlyControlsInfo.Position = UDim2.new(0, 10, 0, 210)
 FlyControlsInfo.BackgroundTransparency = 1
 FlyControlsInfo.Text = "W=Forward | S=Backward | A=Left | D=Right\nR=Up | LeftControl=Down"
 FlyControlsInfo.TextColor3 = Color3.fromRGB(180, 180, 200)
@@ -643,12 +625,12 @@ FlyControlsInfo.Font = Enum.Font.GothamMedium
 FlyControlsInfo.TextXAlignment = Enum.TextXAlignment.Left
 FlyControlsInfo.Parent = CharContent
 
--- Info Label (y=225)
+-- Info Label (y=260)
 local CharInfo = Instance.new("TextLabel")
-CharInfo.Size = UDim2.new(1, -20, 0, 110)
-CharInfo.Position = UDim2.new(0, 10, 0, 225)
+CharInfo.Size = UDim2.new(1, -20, 0, 120)
+CharInfo.Position = UDim2.new(0, 10, 0, 260)
 CharInfo.BackgroundTransparency = 1
-CharInfo.Text = "Noclip: Phase through walls (Press N)\nFly: Invisible platforms spawn under you (Press F)\nUse the above controls to move while flying\nSpeed slider adjusts movement speed\nThreshold slider adjusts noclip teleport distance"
+CharInfo.Text = "Noclip: Phase through walls (Press N)\nFly: Invisible platforms spawn under you (Press F)\nUse the above controls to move while flying\nSpeed slider adjusts movement speed\nThreshold slider adjusts noclip teleport distance\nDeSync: Anchors body parts for server freeze (local move)"
 CharInfo.TextColor3 = Color3.fromRGB(160, 160, 180)
 CharInfo.TextScaled = true
 CharInfo.Font = Enum.Font.GothamMedium
@@ -713,6 +695,16 @@ local FLY_SPEED = 5
 local PLATFORM_LIFETIME = 0.5
 
 -- ============================================
+-- ===== DESYNC VARIABLES =====
+-- ============================================
+local desyncEnabled = false
+local desyncConnection = nil
+local anchoredParts = {}  -- Store original anchored states
+local serverPosition = nil  -- Fixed server position
+local ghostModel = nil  -- Magenta ghost for local position
+local espCham = nil  -- Cyan ESP cham for server position
+
+-- ============================================
 -- ===== FLY PLATFORM FUNCTIONS =====
 -- ============================================
 local function createFlyPlatform(position)
@@ -757,6 +749,144 @@ local function clearAllFlyPlatforms()
     end
     flyPlatforms = {}
 end
+
+-- ============================================
+-- ===== DESYNC FUNCTIONS =====
+-- ============================================
+local function createGhostModel(character)
+    if ghostModel then ghostModel:Destroy() end
+    ghostModel = character:Clone()
+    ghostModel.Name = "GhostModel"
+    ghostModel.Parent = workspace
+    for _, part in pairs(ghostModel:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.Anchored = true
+            part.CanCollide = false
+            part.Transparency = 0.5
+            part.Color = Color3.fromRGB(255, 0, 255)  -- Magenta
+        elseif part:IsA("Accessory") then
+            part:Destroy()  -- Remove accessories for simplicity
+        end
+    end
+    if ghostModel:FindFirstChild("Humanoid") then
+        ghostModel.Humanoid:Destroy()
+    end
+end
+
+local function createESPCham(character, position)
+    if espCham then espCham:Destroy() end
+    espCham = character:Clone()
+    espCham.Name = "ESPCham"
+    espCham.Parent = workspace
+    for _, part in pairs(espCham:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.Anchored = true
+            part.CanCollide = false
+            part.Transparency = 0.7
+            part.Color = Color3.fromRGB(0, 255, 255)  -- Cyan
+            part.Position = position
+        elseif part:IsA("Accessory") then
+            part:Destroy()
+        end
+    end
+    if espCham:FindFirstChild("Humanoid") then
+        espCham.Humanoid:Destroy()
+    end
+end
+
+local function toggleDeSync()
+    desyncEnabled = not desyncEnabled
+    DeSyncToggle.Text = desyncEnabled and "ON" or "OFF"
+    DeSyncToggle.BackgroundColor3 = desyncEnabled and Color3.fromRGB(100, 150, 255) or Color3.fromRGB(50, 50, 80)
+    
+    local character = LocalPlayer.Character
+    if not character then
+        warn("No character found for DeSync")
+        desyncEnabled = false
+        DeSyncToggle.Text = "OFF"
+        return
+    end
+    
+    if desyncEnabled then
+        -- Disable conflicting features
+        if noclipEnabled then toggleNoclip() end
+        if flyEnabled then toggleFly() end
+        
+        print("DeSync enabled - Anchoring body parts, server position frozen")
+        
+        -- Store original anchored states and anchor parts
+        anchoredParts = {}
+        serverPosition = character.HumanoidRootPart.Position
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") and part ~= character.HumanoidRootPart then
+                anchoredParts[part] = part.Anchored
+                part.Anchored = true
+            end
+        end
+        
+        -- Create visuals
+        createGhostModel(character)
+        createESPCham(character, serverPosition)
+        
+        -- Start Heartbeat loop for desync
+        desyncConnection = RunService.Heartbeat:Connect(function()
+            if not desyncEnabled or not character or not character:FindFirstChild("HumanoidRootPart") then return end
+            
+            -- Update ghost to follow local position
+            if ghostModel and ghostModel:FindFirstChild("HumanoidRootPart") then
+                ghostModel.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame
+                for _, part in pairs(ghostModel:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        local origPart = character:FindFirstChild(part.Name, true)
+                        if origPart then
+                            part.CFrame = origPart.CFrame
+                        end
+                    end
+                end
+            end
+            
+            -- Update ESP cham at server position
+            if espCham and espCham:FindFirstChild("HumanoidRootPart") then
+                espCham.HumanoidRootPart.Position = serverPosition
+            end
+            
+            -- Re-anchor parts every frame to maintain desync
+            for part, wasAnchored in pairs(anchoredParts) do
+                if part and part.Parent then
+                    part.Anchored = true
+                end
+            end
+        end)
+    else
+        print("DeSync disabled")
+        
+        -- Restore original anchored states
+        for part, wasAnchored in pairs(anchoredParts) do
+            if part and part.Parent then
+                part.Anchored = wasAnchored
+            end
+        end
+        anchoredParts = {}
+        
+        -- Destroy visuals
+        if ghostModel then
+            ghostModel:Destroy()
+            ghostModel = nil
+        end
+        if espCham then
+            espCham:Destroy()
+            espCham = nil
+        end
+        
+        -- Disconnect Heartbeat
+        if desyncConnection then
+            desyncConnection:Disconnect()
+            desyncConnection = nil
+        end
+    end
+end
+
+DeSyncToggle.MouseButton1Click:Connect(toggleDeSync)
 
 -- ============================================
 -- ===== KEYBINDS FOR NOCLIP AND FLY =====
@@ -1972,7 +2102,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- ===== CLEANUP =====
-LocalPlayer.CharacterAdded:Connect(function()
+LocalPlayer.CharacterAdded:Connect(function(character)
     if espEnabled then
         clearAllESP()
         for _, player in pairs(Players:GetPlayers()) do
@@ -1980,6 +2110,11 @@ LocalPlayer.CharacterAdded:Connect(function()
                 createESP(player)
             end
         end
+    end
+    
+    -- Reset DeSync on character respawn
+    if desyncEnabled then
+        toggleDeSync()
     end
 end)
 
@@ -1989,16 +2124,11 @@ LocalPlayer:WaitForChild("PlayerGui").ChildRemoved:Connect(function(child)
         if fovCircle then fovCircle:Destroy(); fovCircle = nil end
         if noclipConnection then noclipConnection:Disconnect(); noclipConnection = nil end
         if flyConnection then flyConnection:Disconnect(); flyConnection = nil end
+        if desyncConnection then desyncConnection:Disconnect(); desyncConnection = nil end
         clearAllFlyPlatforms()
         teleportQueue = {}
         isProcessingQueue = false
+        if ghostModel then ghostModel:Destroy() end
+        if espCham then espCham:Destroy() end
     end
 end)
-
-print("DrainWare- DrainCity loaded!")
-print("Tabs: Main | Visuals | Character | Settings")
-print("Press " .. uiToggleKeybind .. " to toggle GUI")
-print("Aimbot: Press RMB (or custom key) to aim (STICKY)")
-print("Noclip: Press N to toggle")
-print("Fly: Press F to toggle | W=Forward | S=Backward | A=Left | D=Right | R=Up | LeftControl=Down")
-print("ESP: Toggle in the Visuals tab")
