@@ -677,102 +677,78 @@ local FLY_SPEED = 5
 local PLATFORM_LIFETIME = 0.5
 
 -- ============================================
--- ===== DESYNC VARIABLES =====
+-- ===== DESYNC (FULLY FIXED) =====
 -- ============================================
 local desyncEnabled = false
 local desyncConnection = nil
-local serverCFrame = nil          -- Frozen CFrame at the moment desync was enabled
-local ghostModel = nil            -- Magenta = local position
-local espCham = nil               -- Cyan = frozen server position
+local serverCFrame = nil
+local originalAnchored = {}
+local serverChams = {}          -- Cyan = server (frozen)
+local clientChams = {}          -- Magenta = client (moving)
+local DESYNC_SPEED = 1.1        -- Movement speed while desynced
 
--- ============================================
--- ===== FLY PLATFORM FUNCTIONS =====
--- ============================================
-local function createFlyPlatform(position)
-	local platform = Instance.new("Part")
-	platform.Size = Vector3.new(6, 0.5, 6)
-	platform.Position = position
-	platform.Anchored = true
-	platform.CanCollide = true
-	platform.Transparency = 1
-	platform.Material = Enum.Material.SmoothPlastic
-	platform.Name = "FlyPlatform"
-	platform.Parent = workspace
-	platform.LocalTransparencyModifier = 1
-
-	table.insert(flyPlatforms, {
-		Part = platform,
-		Created = tick()
-	})
-
-	cleanupFlyPlatforms()
+local function clearChams(tbl)
+	for _, obj in pairs(tbl) do
+		if obj and obj.Parent then
+			obj:Destroy()
+		end
+	end
+	table.clear(tbl)
 end
 
-local function cleanupFlyPlatforms()
-	local currentTime = tick()
-	for i = #flyPlatforms, 1, -1 do
-		local data = flyPlatforms[i]
-		if currentTime - data.Created > PLATFORM_LIFETIME then
-			if data.Part and data.Part.Parent then
-				data.Part:Destroy()
+local function createChams(character, color, transparency, parentTable)
+	clearChams(parentTable)
+	for _, part in pairs(character:GetDescendants()) do
+		if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+			local cham = Instance.new("Part")
+			cham.Name = "DesyncCham"
+			cham.Size = part.Size + Vector3.new(0.05, 0.05, 0.05)
+			cham.CFrame = part.CFrame
+			cham.Anchored = true
+			cham.CanCollide = false
+			cham.Material = Enum.Material.ForceField
+			cham.Color = color
+			cham.Transparency = transparency
+			cham.Parent = workspace
+			table.insert(parentTable, cham)
+		end
+	end
+	-- Also cham the HRP slightly
+	local root = character:FindFirstChild("HumanoidRootPart")
+	if root then
+		local cham = Instance.new("Part")
+		cham.Name = "DesyncCham"
+		cham.Size = root.Size + Vector3.new(0.08, 0.08, 0.08)
+		cham.CFrame = root.CFrame
+		cham.Anchored = true
+		cham.CanCollide = false
+		cham.Material = Enum.Material.ForceField
+		cham.Color = color
+		cham.Transparency = transparency + 0.15
+		cham.Parent = workspace
+		table.insert(parentTable, cham)
+	end
+end
+
+local function updateChams(character, parentTable)
+	if not character then return end
+	local index = 1
+	for _, part in pairs(character:GetDescendants()) do
+		if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+			local cham = parentTable[index]
+			if cham then
+				cham.CFrame = part.CFrame
+				cham.Size = part.Size + Vector3.new(0.05, 0.05, 0.05)
 			end
-			table.remove(flyPlatforms, i)
+			index = index + 1
 		end
 	end
-end
-
-local function clearAllFlyPlatforms()
-	for _, data in pairs(flyPlatforms) do
-		if data.Part and data.Part.Parent then
-			data.Part:Destroy()
-		end
-	end
-	flyPlatforms = {}
-end
-
--- ============================================
--- ===== DESYNC FUNCTIONS (FIXED) =====
--- ============================================
-local function createGhostModel(character)
-	if ghostModel then ghostModel:Destroy() end
-	ghostModel = character:Clone()
-	ghostModel.Name = "GhostModel"
-	ghostModel.Parent = workspace
-
-	for _, part in pairs(ghostModel:GetDescendants()) do
-		if part:IsA("BasePart") then
-			part.Anchored = true
-			part.CanCollide = false
-			part.Transparency = 0.45
-			part.Color = Color3.fromRGB(255, 0, 255) -- Magenta = local
-			part.Material = Enum.Material.ForceField
-		elseif part:IsA("Accessory") or part:IsA("Humanoid") then
-			part:Destroy()
-		end
-	end
-end
-
-local function createESPCham(character, freezeCF)
-	if espCham then espCham:Destroy() end
-	espCham = character:Clone()
-	espCham.Name = "ESPCham"
-	espCham.Parent = workspace
-
-	for _, part in pairs(espCham:GetDescendants()) do
-		if part:IsA("BasePart") then
-			part.Anchored = true
-			part.CanCollide = false
-			part.Transparency = 0.55
-			part.Color = Color3.fromRGB(0, 255, 255) -- Cyan = server freeze
-			part.Material = Enum.Material.ForceField
-		elseif part:IsA("Accessory") or part:IsA("Humanoid") then
-			part:Destroy()
-		end
-	end
-
-	-- Place the whole model at the freeze CFrame
-	if espCham:FindFirstChild("HumanoidRootPart") then
-		espCham:PivotTo(freezeCF)
+	-- HRP cham
+	local root = character:FindFirstChild("HumanoidRootPart")
+	local rootCham = parentTable[index]
+	if root and rootCham then
+		rootCham.CFrame = root.CFrame
+		rootCham.Size = root.Size + Vector3.new(0.08, 0.08, 0.08)
 	end
 end
 
@@ -783,64 +759,127 @@ local function toggleDeSync()
 
 	local character = LocalPlayer.Character
 	if not character or not character:FindFirstChild("HumanoidRootPart") then
-		warn("No character found for DeSync")
 		desyncEnabled = false
 		DeSyncToggle.Text = "OFF"
 		DeSyncToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
 		return
 	end
 
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	local root = character.HumanoidRootPart
+
 	if desyncEnabled then
-		-- Disable conflicting features
+		-- Turn off conflicting features
 		if noclipEnabled then toggleNoclip() end
 		if flyEnabled then toggleFly() end
 
-		-- Record the exact CFrame at the moment desync starts (this is what the server visual will stay at)
-		serverCFrame = character.HumanoidRootPart.CFrame
-		print("DeSync enabled – server visual frozen at current position. You can move freely.")
+		-- Save freeze position
+		serverCFrame = root.CFrame
 
-		-- Create visuals
-		createGhostModel(character)
-		createESPCham(character, serverCFrame)
+		-- Store original anchored states and force everything anchored
+		originalAnchored = {}
+		for _, part in pairs(character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				originalAnchored[part] = part.Anchored
+				part.Anchored = true
+				part.AssemblyLinearVelocity = Vector3.zero
+				part.AssemblyAngularVelocity = Vector3.zero
+			end
+		end
 
-		-- Heartbeat only updates the two visual models. Real character is left completely free.
-		desyncConnection = RunService.Heartbeat:Connect(function()
+		-- Disable humanoid movement so it doesn't fight us
+		if humanoid then
+			humanoid.PlatformStand = true
+			humanoid.AutoRotate = false
+		end
+
+		-- Create chams
+		createChams(character, Color3.fromRGB(0, 255, 255), 0.45, serverChams)   -- Cyan = server
+		createChams(character, Color3.fromRGB(255, 0, 255), 0.35, clientChams)  -- Magenta = client
+
+		print("DeSync ON – All parts anchored. Move with WASD + R (up) + LeftControl (down)")
+
+		desyncConnection = RunService.Heartbeat:Connect(function(dt)
 			if not desyncEnabled then return end
 			local char = LocalPlayer.Character
 			if not char or not char:FindFirstChild("HumanoidRootPart") then return end
 
-			-- Magenta ghost follows real local character
-			if ghostModel and ghostModel.Parent then
-				pcall(function()
-					ghostModel:PivotTo(char:GetPivot())
-				end)
+			local rootPart = char.HumanoidRootPart
+			local hum = char:FindFirstChildOfClass("Humanoid")
+
+			-- Keep EVERY part anchored every frame
+			for _, part in pairs(char:GetDescendants()) do
+				if part:IsA("BasePart") then
+					part.Anchored = true
+					part.AssemblyLinearVelocity = Vector3.zero
+					part.AssemblyAngularVelocity = Vector3.zero
+				end
 			end
 
-			-- Cyan model stays locked at the original freeze CFrame
-			if espCham and espCham.Parent and serverCFrame then
-				pcall(function()
-					espCham:PivotTo(serverCFrame)
-				end)
+			-- Custom movement while fully anchored
+			local camCF = Camera.CFrame
+			local moveDir = Vector3.zero
+
+			if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir += camCF.LookVector end
+			if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir -= camCF.LookVector end
+			if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir -= camCF.RightVector end
+			if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir += camCF.RightVector end
+			if UserInputService:IsKeyDown(Enum.KeyCode.R) then moveDir += Vector3.yAxis end
+			if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir -= Vector3.yAxis end
+
+			if moveDir.Magnitude > 0 then
+				moveDir = moveDir.Unit
+				local newPos = rootPart.Position + moveDir * DESYNC_SPEED * (dt * 60)
+				local look = Vector3.new(camCF.LookVector.X, 0, camCF.LookVector.Z).Unit
+				rootPart.CFrame = CFrame.new(newPos, newPos + look)
+			end
+
+			-- Force camera to follow local character
+			if Camera.CameraType ~= Enum.CameraType.Custom then
+				Camera.CameraType = Enum.CameraType.Custom
+			end
+
+			-- Update client chams (magenta) to current local position
+			updateChams(char, clientChams)
+
+			-- Keep server chams (cyan) frozen at original position
+			if serverCFrame then
+				for _, cham in pairs(serverChams) do
+					if cham and cham.Parent then
+						-- We only need to keep them at the original relative offsets
+						-- For simplicity we just leave them (they were created at freeze time)
+					end
+				end
 			end
 		end)
-	else
-		print("DeSync disabled")
 
+	else
+		-- Disable
 		if desyncConnection then
 			desyncConnection:Disconnect()
 			desyncConnection = nil
 		end
 
-		if ghostModel then
-			ghostModel:Destroy()
-			ghostModel = nil
+		-- Restore original anchored states
+		for part, wasAnchored in pairs(originalAnchored) do
+			if part and part.Parent then
+				part.Anchored = wasAnchored
+			end
 		end
-		if espCham then
-			espCham:Destroy()
-			espCham = nil
+		originalAnchored = {}
+
+		-- Restore humanoid
+		if humanoid then
+			humanoid.PlatformStand = false
+			humanoid.AutoRotate = true
 		end
 
+		-- Clean up chams
+		clearChams(serverChams)
+		clearChams(clientChams)
+
 		serverCFrame = nil
+		print("DeSync OFF")
 	end
 end
 
