@@ -286,6 +286,7 @@ local function switchTab(tab)
         SettingsTabButton.BackgroundTransparency = 0.6
         SettingsTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
         ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 600)
+        ScrollingFrame.CanvasPosition = Vector2.new(0, 0)  -- Reset scroll position
     elseif tab == "Visuals" then
         MainContent.Visible = false
         VisualsContent.Visible = true
@@ -300,6 +301,7 @@ local function switchTab(tab)
         SettingsTabButton.BackgroundTransparency = 0.6
         SettingsTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
         ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 350)
+        ScrollingFrame.CanvasPosition = Vector2.new(0, 0)  -- Reset scroll position
     elseif tab == "Character" then
         MainContent.Visible = false
         VisualsContent.Visible = false
@@ -314,6 +316,7 @@ local function switchTab(tab)
         SettingsTabButton.BackgroundTransparency = 0.6
         SettingsTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
         ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 500)  -- Increased for new elements
+        ScrollingFrame.CanvasPosition = Vector2.new(0, 0)  -- Reset scroll position
     else -- Settings
         MainContent.Visible = false
         VisualsContent.Visible = false
@@ -328,6 +331,7 @@ local function switchTab(tab)
         CharTabButton.BackgroundTransparency = 0.6
         CharTabButton.TextColor3 = Color3.fromRGB(180, 180, 200)
         ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 250)
+        ScrollingFrame.CanvasPosition = Vector2.new(0, 0)  -- Reset scroll position
     end
 end
 
@@ -2132,3 +2136,12 @@ LocalPlayer:WaitForChild("PlayerGui").ChildRemoved:Connect(function(child)
         if espCham then espCham:Destroy() end
     end
 end)
+
+print("DrainWare- DrainCity loaded!")
+print("Tabs: Main | Visuals | Character | Settings")
+print("Press " .. uiToggleKeybind .. " to toggle GUI")
+print("Aimbot: Press RMB (or custom key) to aim (STICKY)")
+print("Noclip: Press N to toggle")
+print("Fly: Press F to toggle | W=Forward | S=Backward | A=Left | D=Right | R=Up | LeftControl=Down")
+print("ESP: Toggle in the Visuals tab")
+print("DeSync: Toggle in Character tab (advanced exploit)")
