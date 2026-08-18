@@ -335,10 +335,18 @@ local function switchTab(tab)
     end
 end
 
-MainTabButton.MouseButton1Click:Connect(switchTab, "Main")
-VisualsTabButton.MouseButton1Click:Connect(switchTab, "Visuals")
-CharTabButton.MouseButton1Click:Connect(switchTab, "Character")
-SettingsTabButton.MouseButton1Click:Connect(switchTab, "Settings")
+MainTabButton.MouseButton1Click:Connect(function()
+	switchTab("Main")
+end)
+VisualsTabButton.MouseButton1Click:Connect(function()
+	switchTab("Visuals")
+end)
+CharTabButton.MouseButton1Click:Connect(function()
+	switchTab("Character")
+end)
+SettingsTabButton.MouseButton1Click:Connect(function()
+	switchTab("Settings")
+end)
 
 -- ============================================
 -- ===== UI HELPER FUNCTIONS =====
